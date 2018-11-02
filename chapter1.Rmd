@@ -1,12 +1,16 @@
 
 # About the project
 
-## Learning objectives
+## Learning objectives of the course
 
-The aim of this course (Introduction to Open Data Science) is to get familiar with open software tools (such as R, RStudio, RMarkdown and GitHub). During this course I will learn also how to apply certain statistical methods using these tools.
+During the course I will learn about three themes:
 
-## How these objectives are achieved?
+1. How to use open data sets from different sources **(Open data)**
+2. How to share my own data, code and results using openly available software tools **(Open Science)**
+3. How to apply certain statistical methods **(Data Science)**
 
-The main idea of this course is learn by doing. Each week I complete a new assignment. These assignment are peer reviewed, so I will learn also from other students. The course can be completed online, but I may also attend weekly lectures to work together with other students and receive advice from teachers if needed.
+## My personal thoughts about the course at the beginning
+
+My main motivation to attend the course was to learn more about R and how to use it for analysing and visualising the data. It took me a while to understand how this course works, but now when I have got started I'm quite excited. It looks like I'm goint to learn a lot.
 
 [A link to my GitHub repository](https://github.com/ejalo/IODS-project)
