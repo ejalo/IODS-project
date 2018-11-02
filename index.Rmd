@@ -1,4 +1,5 @@
 ---
+author: "Elli Jalo"
 title: "IODS course project"
 output:
   html_document:
