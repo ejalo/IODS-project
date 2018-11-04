@@ -1,7 +1,6 @@
 ---
 author: "Elli Jalo"
 title: "IODS course project"
-date: "Last updated `r Sys.time()`"
 output:
   html_document:
     theme: simplex
