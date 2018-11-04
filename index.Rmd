@@ -3,7 +3,7 @@ author: "Elli Jalo"
 title: "IODS course project"
 output:
   html_document:
-    theme: cosmo
+    theme: jekyll-theme-cayman
     toc: true
     toc_depth: 2
     fig_caption: true
