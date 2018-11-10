@@ -1,6 +1,6 @@
 # RStudio Exercise 2 
 
-## Data wranglig
+## Data wrangling
 
 First part of the Exercise 2 was data wrangling. Code that I have used to create data for this excercise can be found in [R script](https://github.com/ejalo/IODS-project/blob/master/data/create_learning2014.R) in my GitHub repository.
 
