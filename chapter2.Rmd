@@ -1,4 +1,40 @@
-# Insert chapter 2 title here
+# RStudio Exercise 2 
+
+## Data wranglig
+
+First part of the exercise 2 was data wrangling. Code that I have used for creating data for this excercise can be found in my github repository following this [link](https://github.com/ejalo/IODS-project/blob/master/data/create_learning2014.R).
+
+## Data analysis
+
+###Description of the data used for the exercise
+
+``` {r, include=FALSE}
+# downloading the data and examining the dimensions and structure
+learning2014 <- read.csv("~/GitHub/IODS-project/data/learning2014.csv")
+summary(learning2014)
+dim(learning2014)
+str(learning2014)
+```
+
+In this exercise we use data colleced by Kimmo Vehkalahti between December 2014 and January 2015. Data consists of 166 students. The average (sd) age of the students was 25.5 years. Students filled out questionnaires about their learning strategies and attitudes towards statistics. The items measuring different dimensions (deep/surface/strategic) of learning strategies were averaged to summary scores (deep, stra, and surf). Attitude towards statistics was measured with 10 items, and answers to these items were averaged to summary score (attitude). All summary scores were measured in a scale from 1 to 5. The outcome variable was points obtained from a statistics exam (min 7, max 33).
+
+#### *Figure 2.1* A graphical overwiew of the data
+``` {r, echo=FALSE}
+# accessing library GGally
+library(ggplot2)
+library(GGally)
+
+# drawing a plot   a more advanced plot matrix with ggpairs()
+ggpairs(learning2014, mapping = aes(col=gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+```
+
+A graphical overview of the data and summaries of the variables in the data are presented in the *Figure 2.1*. Out of students, approximately one third were men. Men were slightly older and had slightli better attitude towards statistics, even though based on boxplots it is not possible to say if the differences were statistically significant. There were no clear differences in different dimensions of learning and exam points between gender.
+
+Out of contionuos variables all except age were quite normally distributed. Age was skewed towards right, meaning that most of the students were younger tha 25 years old, but the oldest were around 50 years old. Highes correlation (0.437) was observed between attitude and exam points. Also strategic learning was positively correlated with exam points (0.146), whereas surface learning was negatively correlated with exam points (-0.144). Observed correlatios were similar in both genders. There seemed to be no association between age or deep learning and exam points.
+
+### Regression model
+
+
 
 *Describe the work you have done this week and summarize your learning.*
 
