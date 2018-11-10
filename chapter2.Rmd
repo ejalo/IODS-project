@@ -19,7 +19,7 @@ str(learning2014)
 
 In this exercise we use data colleced by Kimmo Vehkalahti between December 2014 and January 2015. Data consists of 166 students. The average (sd) age of the students was 25.5 years. Students filled out questionnaires about their learning strategies and attitudes towards statistics. The items measuring different dimensions (deep/surface/strategic) of learning strategies were averaged to summary scores (deep, stra, and surf). Attitude towards statistics was measured with 10 items, and answers to these items were averaged to summary score (attitude). All summary scores were measured in a scale from 1 to 5. The outcome variable was points obtained from a statistics exam (min 7, max 33).
 
-#### **Figure 2.1** A graphical overwiew of the data
+##### **Figure 2.1** A graphical overwiew of the data
 ``` {r, echo=FALSE}
 # accessing library GGally
 library(ggplot2)
@@ -37,7 +37,7 @@ Out of continuous variables, all except age were quite normally distributed. Age
 
 I chose to explain exam points with attitude and two dimensions of learning (stategic and surcafe), since those variables had the highest absolute correaltions with exam points. The summary of the regression model is presented in **Table 2.1**.
 
-#### **Table 2.1** Summary of the regression model with three explanatory variables (attitude, strategic learning and surface leargning). Dependent variable is exam points.
+##### **Table 2.1** Summary of the regression model with three explanatory variables (attitude, strategic learning and surface leargning). Dependent variable is exam points.
 ```{r, echo=FALSE}
 # creating the fist regression model
 model_3x <- lm(points ~ attitude + stra + surf, data = learning2014)
@@ -49,7 +49,7 @@ Statistical test related to model parameters tests the null hypothesis that the 
 
 In the second model, variables that did not have a statitically significant relationship with exam points (startegic and surface learning) were removed. The beta estimate of attitude increased to 3.5 (**Table 2.2**) and the result was still higly significant (p<0.001). Multiple R-squared was 0.19, meaning that attitude alone explained 19% of variance in exam points.
 
-#### **Table 2.2** Summary of the regression model second regression model. Attitude as an explanatory variable and exam points as dependent variable.
+##### **Table 2.2** Summary of the regression model second regression model. Attitude as an explanatory variable and exam points as dependent variable.
 ```{r, echo=FALSE}
 # creating the second regression model
 model_attitude <- lm(points ~ attitude, data = learning2014)
@@ -63,12 +63,12 @@ summary(model_attitude)
 In addition to assuming a linear association between explanatory and dependent variable, there are several assumptions regarding residuals (errors) in the linear regression:
 
 1) Residuals should be normally distributed
-2) Residuals should ne indepent on the explanatory variable(s)
+2) Residuals should be indepent on the explanatory variable(s)
 3) Residuals should not be correlated
 
 Model assumptions can be examined graphically with different plots (**Figure 2.2**). *Residuals vs Fitted* uncovers if the residuals are dependent on the explanatory variable. In this exercise, the assumption held and they residuals were not dependent on explanatory variable since the dots in the plot were quite randomly spread aroud the horizontal line and there was no clear pattern to be seen. *Q-Q plot* shows the normality of the residuals. In this exercise, the residuals were quite normally distributed, since the dots in the Q-Q plot fell nicely within the line. The last plot *Residuals vs Leverage* reveals if there are single cases which have unusually high impact on the model. In this exercise, there were no such cases because there were no single dots which stood out from the plot. The highest leverage (on the x axis) was around 0.05, which is quite small. In conclusion, the model met the assumptions very well.
 
-#### **Figure 2.2** Diagnostic plots for the second regression model (points ~ attitude)
+##### **Figure 2.2** Diagnostic plots for the second regression model (points ~ attitude)
 ```{r, echo=FALSE}
 # drawing the diagnostic plots for the
 plots <- c(1,2,5)
