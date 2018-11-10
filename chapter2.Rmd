@@ -2,12 +2,13 @@
 
 ## Data wranglig
 
-First part of the exercise 2 was data wrangling. Code that I have used for creating data for this excercise can be found in my github repository following this [link](https://github.com/ejalo/IODS-project/blob/master/data/create_learning2014.R).
+First part of the Exercise 2 was data wrangling. Code that I have used to create data for this excercise can be found in [R script](https://github.com/ejalo/IODS-project/blob/master/data/create_learning2014.R) in my GitHub repository.
 
 ## Data analysis
 
-###Description of the data used for the exercise
+Seconf part of the Exercise 2 was data analysis. I show only the results and interpretation in this course diary. The code behind the analysis can be found in [the chapter2.Rmd](https://github.com/ejalo/IODS-project/blob/master/chapter2.Rmd) in my Github repository.
 
+###Description of the data used for the exercise
 ``` {r, include=FALSE}
 # downloading the data and examining the dimensions and structure
 learning2014 <- read.csv("~/GitHub/IODS-project/data/learning2014.csv")
@@ -18,7 +19,7 @@ str(learning2014)
 
 In this exercise we use data colleced by Kimmo Vehkalahti between December 2014 and January 2015. Data consists of 166 students. The average (sd) age of the students was 25.5 years. Students filled out questionnaires about their learning strategies and attitudes towards statistics. The items measuring different dimensions (deep/surface/strategic) of learning strategies were averaged to summary scores (deep, stra, and surf). Attitude towards statistics was measured with 10 items, and answers to these items were averaged to summary score (attitude). All summary scores were measured in a scale from 1 to 5. The outcome variable was points obtained from a statistics exam (min 7, max 33).
 
-#### *Figure 2.1* A graphical overwiew of the data
+#### **Figure 2.1** A graphical overwiew of the data
 ``` {r, echo=FALSE}
 # accessing library GGally
 library(ggplot2)
@@ -28,16 +29,49 @@ library(GGally)
 ggpairs(learning2014, mapping = aes(col=gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
 ```
 
-A graphical overview of the data and summaries of the variables in the data are presented in the *Figure 2.1*. Out of students, approximately one third were men. Men were slightly older and had slightli better attitude towards statistics, even though based on boxplots it is not possible to say if the differences were statistically significant. There were no clear differences in different dimensions of learning and exam points between gender.
+A graphical overview of the data and summaries of the variables in the data are presented in the **Figure 2.1**. Out of students, approximately one third were men. Men were slightly older and had slightly better attitude towards statistics, even though based on boxplots, it is not possible to say if the differences were statistically significant. There were no clear differences in different dimensions of learning and exam points between genders.
 
-Out of contionuos variables all except age were quite normally distributed. Age was skewed towards right, meaning that most of the students were younger tha 25 years old, but the oldest were around 50 years old. Highes correlation (0.437) was observed between attitude and exam points. Also strategic learning was positively correlated with exam points (0.146), whereas surface learning was negatively correlated with exam points (-0.144). Observed correlatios were similar in both genders. There seemed to be no association between age or deep learning and exam points.
+Out of continuous variables, all except age were quite normally distributed. Age was skewed towards right, since most of the students were younger than 25 years old, but the oldest were around 50 years old. The highest correlation (0.437) was observed between attitude and exam points. Also strategic learning was positively correlated with exam points (0.146), whereas surface learning was negatively correlated with exam points (-0.144). Observed correlatios were similar in both genders. There seemed to be no association between age or deep learning and exam points.
 
 ### Regression model
 
+I chose to explain exam points with attitude and two dimensions of learning (stategic and surcafe), since those variables had the highest absolute correaltions with exam points. The summary of the regression model is presented in **Table 2.1**.
 
+#### **Table 2.1** Summary of the regression model with three explanatory variables (attitude, strategic learning and surface leargning). Dependent variable is exam points.
+```{r, echo=FALSE}
+# creating the fist regression model
+model_3x <- lm(points ~ attitude + stra + surf, data = learning2014)
 
-*Describe the work you have done this week and summarize your learning.*
+# printing out a summary of the model
+summary(model_3x)
+```
+Statistical test related to model parameters tests the null hypothesis that the beta estimate is 0. Summary of the fitted model shows that out of the examined variables, only attitude was significantly associated with exam points (p<0.001). The beta estimate was 3.4 meaning that if attitude towards statistics (on a scale from 1 to 5) increases one point, the exam points increase by 3.4 on average. As already mentioned, strategic and surface learning were not significantly associated with exam points. Their beta estimates were quite close to 0 (0.9 and -0.6 respectively) and p-values were over 0.5. The multiple R-squared was 0.21 meaning that these three variables together explained 21% of the variance in exam points. 
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+In the second model, variables that did not have a statitically significant relationship with exam points (startegic and surface learning) were removed. The beta estimate of attitude increased to 3.5 (**Table 2.2**) and the result was still higly significant (p<0.001). Multiple R-squared was 0.19, meaning that attitude alone explained 19% of variance in exam points.
+
+#### **Table 2.2** Summary of the regression model second regression model. Attitude as an explanatory variable and exam points as dependent variable.
+```{r, echo=FALSE}
+# creating the second regression model
+model_attitude <- lm(points ~ attitude, data = learning2014)
+
+# print out a summary of the model
+summary(model_attitude)
+```
+
+### Model validation
+
+In addition to assuming a linear association between explanatory and dependent variable, there are several assumptions regarding residuals (errors) in the linear regression:
+
+1) Residuals should be normally distributed
+2) Residuals should ne indepent on the explanatory variable(s)
+3) Residuals should not be correlated
+
+Model assumptions can be examined graphically with different plots (**Figure 2.2**). *Residuals vs Fitted* uncovers if the residuals are dependent on the explanatory variable. In this exercise, the assumption held and they residuals were not dependent on explanatory variable since the dots in the plot were quite randomly spread aroud the horizontal line and there was no clear pattern to be seen. *Q-Q plot* shows the normality of the residuals. In this exercise, the residuals were quite normally distributed, since the dots in the Q-Q plot fell nicely within the line. The last plot *Residuals vs Leverage* reveals if there are single cases which have unusually high impact on the model. In this exercise, there were no such cases because there were no single dots which stood out from the plot. The highest leverage (on the x axis) was around 0.05, which is quite small. In conclusion, the model met the assumptions very well.
+
+#### **Figure 2.2** Diagnostic plots for the second regression model (points ~ attitude)
+```{r, echo=FALSE}
+# drawing the diagnostic plots for the
+plots <- c(1,2,5)
+plot(model_attitude, which=plots)
+```
+
