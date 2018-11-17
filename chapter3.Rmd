@@ -1,0 +1,106 @@
+
+#Rstudio Exercise 3
+
+###Description of the data used for the exercise
+
+In this exercise we use Student Performance Data Set which can be downloaded from [Machine learning repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance). The data includes students from two diffent Portugese schools (Gabriel Pereira and Mousinho da Silveira). The two original datasets with information about the performance in mathematics and portugese language were combined in dara wrangling part of this exercise. My Rscript for creating the analysis data can be found [here](https://github.com/ejalo/IODS-project/blob/master/data/create_alc.R) in my GitHub repository. The combined data includes only subjects who had information about both mathematics and portugese language. Below the variable names of the data are printed. In this exercise we are especially interested in low vs. high alcohol consumption and different backround characteristics associated with it. Alcohol consumption is measured in a scale from 1/"very low" to 5/"very high" separately for workdays and weekend. High alcohol consumption refers to average alcohol consumption score higher than 2.
+``` {r, echo=FALSE}
+# downloading the data and printin out the colnames
+alc <- read.csv("~/GitHub/IODS-project/data/alc.csv")
+colnames(alc)
+```
+
+### Choosing variables for analysis and setting hypothesis.
+
+In this exercise, I'm going to study four interesting variables which might explain high alcohol consumption. I choose student's gender (sex), mother's education (Medu), extra-curricular activities (activites) and going out with friends (goout) as the variables of interest. I hypothesise:
+
+1) The risk of being "high user" is greater in boys compared to girls
+2) Mother's higher education is related to less alcohol consumption
+3) Having extra curricular activities is associated with less alcohol consumption.
+4) Going out with friens is associated with higher alcohol consumption
+
+##### **Descriptive results of the variables of interest**
+``` {r, echo=FALSE, message=FALSE,warning=FALSE}
+library(dplyr);library(tidyr); library(ggplot2)
+
+#create data with only the variables of interest
+alc2=select(alc, c("sex", "Medu", "activities", "goout", "high_use"))
+
+# drawing a bar plot of each variable
+gather(alc2) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+
+```
+
+``` {r, echo=FALSE, message=FALSE}
+
+alc %>% group_by(high_use, sex) %>% summarise(count = n())
+```
+
+As hypothesised, it looks like the sex is associated with alcohol use. There are more girls in low achohol use category whereas in high alcohol consumption category there are more boys.
+
+``` {r, echo=FALSE}
+g2 <- ggplot(alc, aes(x = high_use, y = Medu))
+g2 + geom_boxplot() + ylab("mother's eduaction")
+```
+
+The boxplots look so similar in both groups that mother's education probably is not related to alcohol consumption. The observation is contradictory to my hypothesis, I assumed tha students with high alcohol consumption would have less educated mothers. Mother's education probably should not be threated as continuous variable, but I did not have time  find better solution for this variable.
+
+``` {r, echo=FALSE, message=FALSE}
+alc %>% group_by(high_use, activities) %>% summarise(count = n())
+```
+
+Based on the crosstabulation above, it seems that there is no clear difference in alcohol consumption if student has or does not have extra-curricular activities. This is also contradictory to my hypothesis. I assumed that students with high alcohol consumption would have less extra-curricular activites. There might be a slight tendency towards that direction, but the diffences between high vs. low alchol consumption groups are not very large.
+
+``` {r, echo=FALSE}
+g1 <- ggplot(alc, aes(x = high_use, y = goout))
+g1 + geom_boxplot() + ylab("Going out with friends")
+```
+
+Based on the boxplot above it looks like going out is associated with high alcohol use. Students with high alcohol consumption had higher scores for goint out with friends. The observation is in line with my hypothesis.
+
+### Logistic regression
+
+##### **The first model including all the variables of interest**
+``` {r, echo=FALSE, message=FALSE,warning=FALSE}
+# find the model with glm()
+m <- glm(high_use ~ sex + Medu + activities + goout, data = alc, family = "binomial")
+
+# compute odds ratios (OR)
+OR <- coef(m) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+
+As assumed when exploring the variables, only sex and going out are significantly associated with the alcohol consumtion, since the confidence intervals of ORs for these variables do not include 1. OR for boys is 2.6, meaning that boys have 2.6 times higher odds of high alcohol consumption compared to girls. OR for going out is 2.1, meaning that each 1 point increase in going out scale (from 1 to 5) is associated with 2.1 higher odds of high alcohol consumption. 
+
+##### **Predictive power of the model**
+``` {r, echo=FALSE, message=FALSE,warning=FALSE}
+# fitting the model
+m2 <- glm(high_use ~ sex + goout, data = alc, family = "binomial")
+
+# predicting the probability of high_use
+probabilities <- predict(m2, type = "response")
+
+# adding the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+
+# useing the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# initialize a plot of 'high_use' versus 'probability' in 'alc'
+g <- ggplot(alc, aes(x = probability, y = high_use, col = prediction))
+
+# define the geom as points and draw the plot
+g + geom_point()
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table %>% addmargins
+```
+
+I wonder if my graph went wrong, since it does look a bit strange to me. I do not really know hot to interpret it.
+
+Based on the crosstabulation of predicted vs. observed values, it looks like approximattely 21 % of the students (0.045 + 0.165 x 100 %) end up incorrectly classified. It is probably a bit better than just guessing.
