@@ -20,7 +20,6 @@ dim(Boston)
 
 Below are shown the summaries and histograms of each variable. The variables are not very normaly distributed. One of the variables (chas) is categorical. The value 0 means that tract does not bound Charles River. Only very few observations have a value 1 in chas-variable.
 
-
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 library(corrplot); library(dplyr);library(tidyr); library(ggplot2)
 
@@ -30,7 +29,7 @@ summary(Boston)
 gather(Boston) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_histogram()
 ```
 
-Below the relationships of the variables are shown in a correlation matrix. Strong negative correaltions are found between dis (weighted distances to five Boston employment centres) and age (proportion of owner-occupied units built prior to 1940), nox (nitric oxided concentration, and indus (proportion of non-retail business acres per town). This mean that if the distance from the employment centres increases, the housing units are younger, there is less nitric oxid and less non-retail business acres. A quite strong negative correlation was also found between medv (median value of owner-occupied houses) and lstat (% lower status of the population), meaning that value of the houses increases there is less lower status population. Highest positive correaltion was found between rad and tax. Meaning that when accessibility to radial highways inreases, also the property tax-rate increases.
+Below the relationships of the variables are shown in a correlation matrix. Strong negative correaltions are found between dis (weighted distances to five Boston employment centres) and age (proportion of owner-occupied units built prior to 1940), nox (nitric oxided concentration, and indus (proportion of non-retail business acres per town). This means that if the distance from the employment centres increases, the housing units are younger, there is less nitric oxid and less non-retail business acres. A quite strong negative correlation was also found between medv (median value of owner-occupied houses) and lstat (% lower status of the population), meaning that value of the houses increases there is less lower status population. Highest positive correaltion was found between rad and tax. Meaning that when accessibility to radial highways inreases, also the property tax-rate increases.
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 
@@ -61,6 +60,7 @@ gather(boston_scaled) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free"
 ### Creating the categorical crime variable and dividing the dataset
 
 Frequencies of the new categorical crime-variable:
+
 ```{r}
 
 # creating a quantile vector of crim 
@@ -93,15 +93,13 @@ train <- boston_scaled[ind,]
 
 # create test set 
 test <- boston_scaled[-ind,]
-
 ```
 
 ### Linear discriminant analysis
+
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 # linear discriminant analysis
 lda.fit <- lda(crime ~ ., data = train)
-
-# print the lda.fit object
 lda.fit
 
 # the function for lda biplot arrows
@@ -119,12 +117,13 @@ classes <- as.numeric(train$crime)
 
 # plot the lda results
 plot(lda.fit, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 1)
+lda.arrows(lda.fit, myscale = 2)
 ```
 
 ### Predicting the classes with the LDA model on the test data.
 
 Cross-tabulation of the correct vs. predicted crime classes in the test data:
+
 ```{r, warning=FALSE, error=FALSE}
 
 # save the correct classes from test data
@@ -144,17 +143,23 @@ From the cross-tabluation we can see that the model is quite good at predicting 
 
 ### K-means clustering
 
-```{r}
+##### **Distances**
+
+```{r, echo=FALSE}
+library(MASS)
+data('Boston')
+boston_scaled <- scale(Boston)
+summary(boston_scaled)
+boston_scaled <- as.data.frame(boston_scaled)
+
 # euclidean distance matrix for scaled variables
 dist_eu <- dist(boston_scaled)
 summary(dist_eu)
+```
 
-# k-means clustering
-km <-kmeans(boston_scaled, centers = 3)
+##### **Determining the number of clusters**
 
-# plot the Boston dataset with clusters
-pairs(boston_scaled, col = km$cluster)
-
+```{r, echo=FALSE}
 set.seed(123)
 
 # determine the number of clusters
@@ -166,11 +171,19 @@ twcss <- sapply(1:k_max, function(k){kmeans(boston_scaled, k)$tot.withinss})
 # visualize the results
 qplot(x = 1:k_max, y = twcss, geom = 'line')
 
+```
+
+The optimal number of clusters seems to be 2, because the line flattens after that.
+
+##### **Plotting clusters**
+
+Below the plotted clusters are presented. To be honest, I can't interpret the plots. I hope that I learn during peer review exercise :)
+
+```{r, echo=FALSE}
 # k-means clustering
 km <-kmeans(boston_scaled, centers = 2)
 
 # plot the Boston dataset with clusters
 pairs(boston_scaled, col = km$cluster)
 ```
-
 
