@@ -96,3 +96,59 @@ The first principal component correlates positively with adolescent birth rate (
 The second principal component correlates positiviely with percentage of female representatives in parliament (*Parli.F*) and women to men labour force ratio (*Labo.FM*) This means that in a country scoring high on the second principal component, there is a high percentage of female representatives in parliament, and there is a high proportion of women compared to proportion of men in labour force.
 
 ## 5. Multiple Correspondence Analysis (MCA)
+
+The  'tea' dataset from the FactoMineR package was loaded. The original dataset contained 36 variables and 300 observations. Below are shown the dimensions ans structure of the data, as well as data visualization as barplots.
+
+```{r, warning=FALSE, message=FALSE}
+library(FactoMineR)
+
+data("tea")
+
+dim(tea)
+str(tea)
+
+gather(tea[1:12]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+
+gather(tea[13:24]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+
+gather(tea[25:36]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+
+
+```
+
+I leave the variable *age* out of the MCA because it seem to be contionuous and there is also a categorical age variable (*age_Q*) in the data. Below is shown a biplot on 'tea' dataset without variable *age*. Because there is so many variables, the plot looks messy.
+
+```{r}
+tea2 <- dplyr::select(tea, -age)
+
+# multiple correspondence analysis
+mca <- MCA(tea2, graph = FALSE)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage="quali")
+```
+
+To keep the exercise and interpretation more simple, I choose six interesting variables from 'tea' dataset for MCA (*breakfast, sex, sugar, feminine, relaxing,* and *how*).
+
+```{r}
+tea3 <- dplyr::select(tea, c("breakfast","sex", "sugar", "feminine", "relaxing", "how"))
+
+# multiple correspondence analysis
+mca2 <- MCA(tea3, graph = FALSE)
+
+# summary of the model
+summary(mca2)
+```
+
+The model summary above shows that the first dimension explains 20.9% and the second dimension explaines 16.9% of the variance in these six variables from 'tea' dataset. The two dimensional solution would not be very good at explaining the total variance, since the rest of the dimensions (3-6) also explain considerable amount of the variance in these variables (11.4-16.0%).
+
+Variables *sex* and *femine* have high contributions (0.687 and 0.550) to the first dimension. An indvidual scoring high on the first dimension is likely to be male and consider tea as not feminine. Variables *how* and *sugar* have high contributions (0.440 and 0.362) to the second dimension. An indivial scoring high on the second dimension is likely to drink tea without sugar and use both, tea bags and unpacked tea. Variables *how*, *breakfast* and *relaxing* have high contributions (0.450, 0.335 and 0.325) to the third dimension. An individual scoring high on the third dimension is likely to use tea bags, not to drink tea at breakfast and consider frinking tea as relaxing.
+
+The first two dimensions are shown in the biplot below. It can bee seen that being male (*M*) and considering tea drinkin not feminine (*Not.feminine*) are guire close to eah other. The categories of *sex* and *feminine* are at the opposite ends of x-axis, meaning that these variables determine the first dimension. Also variable *sugar* contributes to the first dimension. The second dimension is more messy, but as already discribed it is mainly driven by *sugar* and *how*.
+
+I guess that the third dimension can also kind of be seen from this biplot, because it shows that using tea bags, not drinking tea for breakfast and considering tea as relaxing "belong together", since they are close to each other in a plot. At the same time, using unpacked tea, drinking tea for breakfast, and considering tea not relaxing belong also together.
+
+```{r}
+# visualize MCA
+plot(mca2, invisible=c("ind"), habillage="quali")
+```
