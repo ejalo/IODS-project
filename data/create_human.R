@@ -89,14 +89,13 @@ dim(human)
 
 # As instructed, there are 155 observations and 8 variables in the human-data.
 
-# Saving the dataset to the "data"-folder 
-write.csv(human, file="~/GitHub/IODS-project/data/human.csv", row.names=FALSE)
+# Saving the dataset to the "data"-folder (this time we want to keep row names)
+write.csv(human, file="~/GitHub/IODS-project/data/human.csv")
 
 # testing that the data opens
-# Demonstrating the opening of the data
-test_ex5<- read.csv("~/GitHub/IODS-project/data/human.csv")
+# Demonstrating the opening of the data (read the row names from the first column)
+test_ex5<- read.csv("~/GitHub/IODS-project/data/human.csv", row.names=1)
 str(test_ex5)
 dim(test_ex5)
-
-
+row.names(test_ex5)
 
