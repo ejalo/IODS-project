@@ -1,0 +1,98 @@
+# Rstudio Exercise 5
+
+## 1. Graphical overview and summaries of the variables
+
+There are 8 numeric/integer variables in the 'human' data. Summaries of these variables are shown below:
+```{r}
+human <- read.csv("~/GitHub/IODS-project/data/human.csv", row.names=1)
+
+summary(human)
+```
+
+First, I looked the distributions of the variables using histograms. Expected years of schooling (*Edu.Exp*) was close to normal distribution, but other variables were more or less skewed.
+```{r, warning=FALSE, message=FALSE}
+library(corrplot); library(dplyr);library(tidyr); library(ggplot2); library(GGally)
+
+# drawing a histogram of each variable
+gather(human) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_histogram()
+```
+
+```{r, warning=FALSE, message=FALSE}
+# graphical overview using ggpairs
+ggpairs(human)
+
+```
+
+Above is shown a graphical overview of the distributions of variables and correltions between them. Strongest negative correlation (-0.857) was found between maternal mortality ratio (*Mat.Mor*) and life expectancy at birth (*Life.Exp*). This means if maternal mortality ratio is higher, life expectancy at birth is lower, which sounds reasonable. Also gross national income per capita (*GNI*), expected years of schooling (*Edu.Exp*), and ratio of proportion of women with secondary eduaction to proportion of men with secondary education (*Edu2.FM*) correlated negatively with maternal mortality ratio, whereas adolescent birth rate (*Ado.Birth*) correlated positively with maternal mortality ratio. A strong positive correlation (0.789) was also found between life expectancy at birth and expected years of schooling. A visual presentation of the correlation matrix is shown below.
+```{r, warning=FALSE, message=FALSE}
+# calculating and the correlation matrix
+cor_matrix<-cor(human) %>% round(2)
+
+# visualizing the correlation matrix
+corrplot(cor_matrix, method="circle", type="upper", tl.pos = "d", tl.cex = 0.6)
+```
+
+## 2.-4. Principal component analysis (PCA)
+
+### PCA on the non-standardized 'human' data
+
+PCA was first done for the original, non-standardized data. The percentage of variability explained by the principal components is shown below. It looks like the first component explaines 100 % variance in the data, and there is none left for other components to explain.
+```{r, warning=FALSE, message=FALSE}
+#PCA
+pca_human <- prcomp(human)
+
+# create and print out a summary of pca_human
+s <- summary(pca_human)
+
+# rounded percetanges of variance captured by each PC
+pr_var_pca_human <- round(100*s$importance[2, ], digits =1)
+pr_var_pca_human
+```
+
+The biplot below shows that the first principal component is driven by GNI, which has a very high negative correlation with the component; The arrow for GNI is aligned with the x axis, but it goes to opposite direction.
+```{r, warning=FALSE, message=FALSE}
+# Labels for biplot
+lab_pc_human <- paste0(names(pr_var_pca_human), " (", pr_var_pca_human, "%)")
+
+# draw a biplot
+biplot(pca_human, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "red3"), xlab = lab_pc_human[1], ylab = lab_pc_human[2])
+```
+
+### PCA on standardized data
+
+The data was standardized so that the mean of each variable was set to 0 and standard deviation to 1. After that, the PCA was applied to standardized data. The percentage of variability explained by the principal components is shown below. Now there is a lot more variability how much of the variance is explained by each of the components. The first principal component explaines 53.6% and the second principal component explaines 16.2% of the variance in the standardized data. The results are so different compared to results with non-standardized data, because in PCA, a variable with the highest variation has the highest importance. Because GNI varies on a scale from 0 to over 120000, it also has very much higher variation compared to other variables. Scaling the dataset gives all variables same standard deviation and therefore equal importance in PCA.
+
+```{r, warning=FALSE, message=FALSE}
+#standardizing
+human_std <- scale(human)
+
+#PCA
+pca_human_std <- prcomp(human_std)
+
+# create and print out a summary of pca_human
+s_std <- summary(pca_human_std)
+
+# rounded percetanges of variance captured by each PC
+pr_var_pca_human_std <- round(100*s_std$importance[2, ], digits =1)
+pr_var_pca_human_std
+```
+
+A biplot on standardized data shows that *Parli.F* and *Labo.FM* load highly on the second principal component, and rest of the variables load highly on the first principal component.
+
+```{r, warning=FALSE, message=FALSE}
+# Labels for biplot
+lab_pc_human_std <- paste0(names(pr_var_pca_human_std), " (", pr_var_pca_human_std, "%)")
+
+# draw a biplot
+biplot(pca_human_std, choices = 1:2, cex = c(0.6, 0.9), col = c("grey40", "darkgreen"), xlab = lab_pc_human_std[1], ylab = lab_pc_human_std[2])
+
+```
+##### **A biplot on standardized data.** Variable names: Edu.Exp = "Expexted years of schooling", Life.Exp = "Life expectancy at birth", GNI = "Gross National Income per capita", EDU2.FM = "women to men ratio completed secondary education", Mat.Mor = "Maternal mortality ratio", Ado.Birth="Adolescent birth rate", Labo.FM = "ratio of proportion of women in labour force to proportoion of men in labour force", Parli.F = "PErcentage of female representatives in parliament"
+
+### Interpretations of the first two principal component dimension based on the biplot on standardized data
+
+The first principal component correlates positively with adolescent birth rate (*Ado.Birth*) and maternal mortality rate (*Mat.Mor*) and it correlates negatively with life expectancy at birth (*Life.Exp*), women to men education ratio (*Edu2.FM*), gross national income per capita (*GNI*), and expected years of schooling (*Edu.Exp*). This means that a country scoring high on first principal component has high maternal mortality ratio and adolescent birth rate, as well as low life expectancy at birth, low GNI and low expected years of schooling. Also a lower proportion of women compared to proportion of men in that country have completed secondary education.
+
+The second principal component correlates positiviely with percentage of female representatives in parliament (*Parli.F*) and women to men labour force ratio (*Labo.FM*) This means that in a country scoring high on the second principal component, there is a high percentage of female representatives in parliament, and there is a high proportion of women compared to proportion of men in labour force.
+
+## 5. Multiple Correspondence Analysis (MCA)
