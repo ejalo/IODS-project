@@ -1,6 +1,6 @@
 # Rstudio exercise 6
 
-The task in the Rstudio exercise 6 is to repeat the analyses done in chapters 8 and 9 of MABS (Vehkalahti and Everitt, 2019), but use the two datasets in reverse order. In chapter 8 of MABS, the analyses are done with BPRS data, but in this exercise we implepent the analyses using RATS data. Similarly, we implent the analyses of chapter 9 of MABS using the BPRS data even though they were originally done with BPRS data.
+The task in the Rstudio exercise 6 is to repeat the analyses done in chapters 8 and 9 of MABS (Vehkalahti and Everitt, 2019), but use the two datasets in reverse order. In chapter 8 of MABS, the analyses are done with BPRS data, but in this exercise we implepent the analyses using RATS data. Similarly, we implement the analyses of chapter 9 of MABS using the BPRS data even though they were originally done with RATS data. To make my report easier to follow, I have used same numbers for figures and tables as were used in th chapters of MABS.
 
 ## The analyses of Chapter 8 of MABS using RATS data
 
@@ -98,6 +98,7 @@ ggplot(RATSL, aes(x = factor(Time), y = Weight, fill = Group))+
 
 ##### **FIGURE 8.4** Boxplots for summaries of weight for the diets at each time point in the RATS data.
 
+
 Boxplots gives also a possiblity to identify outliers. In group 2 there is one rat with considerable higher weight than others which can bee seen from the figure 8.5 where mean weights of each rat at all timepoints after baseline are plotted. I'm quite hesitant to identify this rat as an otlier, because the weight is clearly at possible range and from the earlier figures we see that the growth of this heavy rat is similar compared to other is that group. However, for educational purposes, I filter out this rat and draw the figure 8.6 without it.
 
 ```{r, message=FALSE, warning=FALSE}
@@ -129,7 +130,8 @@ ggplot(RATSL_summary2F, aes(x = Group, y = mean)) +
 
 ##### **FIGURE 8.6** Boxplots of mean weight for the diet groups in the RATS data without an outlier (a heavy rat in Group 2).
 
-The differences between diet groups can't be tested with t-test as was done in chapter 8 for BPRS data, because t-test can only deal with two groups. The analysis of covariance (TAble 8.4) is possible. From the ANCOVA table (Table 8.4) we see that the mean weights in diet groups are not different when the baseline weight is taken into account (p=0.076).
+
+The differences between diet groups can't be tested with t-test as was done in chapter 8 for BPRS data, because t-test can only deal with two groups. The analysis of covariance (Table 8.4) is possible. From the ANCOVA table (Table 8.4) we see that the mean weights in diet groups are not different when the baseline weight is taken into account (p=0.076).
 
 ##### **TABLE 8.4** Results from an analysis of covariance of the RATS Data with Baseline Weight and diet group covariates
 ```{r, message=FALSE, warning=FALSE}
@@ -140,3 +142,120 @@ RATSL_summary2b <- RATSL_summary2 %>%
 fit <- lm(mean ~ baseline + Group, data = RATSL_summary2b)
 anova(fit)
 ```
+
+
+## The analyses of Chapter 9 of MABS using BPRS data
+
+First, we explore the data ignoring the repeated-measures structure (Figure 9.1 and Table 9.3).
+``` {r, warning=FALSE, message=FALSE}
+# accessing the data and re-converting treatment and subject as factors
+
+BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
+
+BPRS$treatment <- factor(BPRS$treatment)
+BPRS$subject <- factor(BPRS$subject)
+
+BPRSL <- read.csv(file="~/GitHub/IODS-project/data/BPRSL.csv")
+
+BPRSL$treatment <- factor(BPRSL$treatment)
+BPRSL$subject <- factor(BPRSL$subject)
+```
+
+```{r, warning=FALSE, message=FALSE}
+# Drawing the Fig 9.1
+ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
+  geom_text(aes(label = treatment)) +
+  scale_x_continuous(name = "Week", breaks = seq(0, 8, 1)) +
+  scale_y_continuous(name = "bprs score") + theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+##### **FIGURE 9.1** Bprs score plotted agains weeks ignoring the repeated measures structure. The treatment to which each observations belongs identified with number.
+
+
+##### **TABLE 9.3** Linear regression model to BPRS data in *long form* with BPRS scores as target variable and treatment and week as explanatory variables. Ignoring the repeated-measures structure of the data.
+```{r, message = FALSE, warning=FALSE}
+BPRS_reg <- lm(bprs ~ treatment + week, data = BPRSL)
+summary(BPRS_reg)
+```
+
+Results from linear regression ignoring the repeated-measures structure (Table 9.3) show that treatment is not significantly associated with bprs score (p=0.661), but the regression on week is higly significant (p<0.001).
+
+The figures taking the repeated-measures structure into account are presented below (Figure 9.2 and Figure 9.3). From the figure 9.2 we see the individual changes in bprs scores. In the original figure 9.2, all groups (in this case treatments) were plotted in the same picture. I divided them into two figures according to treatment because otherwise figure would have been too messy. From the scatterplot matrix (Figure 9.3) we can see that repeated measures are dependent from one another.
+
+```{r, warning=FALSE, message=FALSE, fig.width=10, fig.height=5}
+# Drawing the Fig 9.2
+ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
+  geom_line(aes(linetype = treatment)) +
+  scale_x_continuous(name = "Time (weeks)", breaks = seq(0, 8, 1)) +
+  scale_y_continuous(name = "bprs score") +
+  theme_bw() + theme(legend.position = "none") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  facet_grid(. ~ treatment, labeller = label_both)
+```
+
+##### **FIGURE 9.2** The cange in bprs scores in individual participants.
+
+```{r, fig.width=10, fig.height=10}
+#Drawing the Fig 9.3
+pairs(BPRS[, 3:11], cex = 0.7)
+```
+
+##### **FIGURE 9.3** Scatterplot matrix of repeated measures in BPRS data.
+
+##### **TABLE 9.4** Results from fitting random intercept model, with week and treatment as explanatory variables, to BPRS data
+```{r}
+#Table 9.4
+library("lme4")
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref)
+```
+
+##### **TABLE 9.5** Results from fitting random intercept and slope model, with week and treatment as explanatory variables, to BPRS data
+```{r}
+# Table 9.5
+BPRS_ref2 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref2)
+
+anova(BPRS_ref2, BPRS_ref)
+```
+
+##### **TABLE 9.6** Results from fitting the random intercept and slope model that allows for a treatment + week interaction to BPRS data
+
+```{r}
+# TAble 9.6
+BPRS_ref3 <- lmer(bprs ~ week*treatment + (week | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref3)
+
+anova(BPRS_ref3, BPRS_ref2)
+```
+
+
+```{r, echo=TRUE, fig.width=8, fig.height=4}
+Fitted <- fitted(BPRS_ref3)
+BPRSL <- BPRSL %>% mutate(Fitted)
+graph1 <- ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
+ geom_line(aes(linetype = treatment)) +
+ scale_x_continuous(name = "week", breaks = seq(0, 8, 1)) +
+ scale_y_continuous(name = "bprs score") +
+ theme_bw() + theme(legend.position = "none")  +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+ ggtitle("Observed") +
+  facet_grid(. ~ treatment, labeller = label_both)
+
+graph2 <- ggplot(BPRSL, aes(x = week, y = Fitted, group = subject)) +
+ geom_line(aes(linetype = treatment)) +
+ scale_x_continuous(name = "week", breaks = seq(0, 8, 1)) +
+ scale_y_continuous(name = "bprs score") +
+ theme_bw() + theme(legend.position = "none")  +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+ ggtitle("Fitted") +
+  facet_grid(. ~ treatment, labeller = label_both)
+
+graph1; graph2
+```
+
+##### **FIGURE 9.4** Fitted changes in bprs scores from the interaction model and observed bprs changes
+Fitted growth rate profiles from the interaction model and observed growth
+rate profiles.
+
