@@ -172,6 +172,7 @@ ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
 
 ##### **FIGURE 9.1** Bprs score plotted agains weeks ignoring the repeated measures structure. The treatment to which each observations belongs identified with number.
 
+Results from linear regression ignoring the repeated-measures structure (Table 9.3) show that treatment is not significantly associated with bprs score (p=0.661), but the regression on week is higly significant (p<0.001).
 
 ##### **TABLE 9.3** Linear regression model to BPRS data in *long form* with BPRS scores as target variable and treatment and week as explanatory variables. Ignoring the repeated-measures structure of the data.
 ```{r, message = FALSE, warning=FALSE}
@@ -179,7 +180,6 @@ BPRS_reg <- lm(bprs ~ treatment + week, data = BPRSL)
 summary(BPRS_reg)
 ```
 
-Results from linear regression ignoring the repeated-measures structure (Table 9.3) show that treatment is not significantly associated with bprs score (p=0.661), but the regression on week is higly significant (p<0.001).
 
 The figures taking the repeated-measures structure into account are presented below (Figure 9.2 and Figure 9.3). From the figure 9.2 we see the individual changes in bprs scores. In the original figure 9.2, all groups (in this case treatments) were plotted in the same picture. I divided them into two figures according to treatment because otherwise figure would have been too messy. From the scatterplot matrix (Figure 9.3) we can see that repeated measures are dependent from one another.
 
@@ -203,13 +203,17 @@ pairs(BPRS[, 3:11], cex = 0.7)
 
 ##### **FIGURE 9.3** Scatterplot matrix of repeated measures in BPRS data.
 
+Next we proceed fitting linear mixed models to the BPRS data. First step is to fit a random interept model with week and treatment as explanatory variables (Table 9.4). Random intercept model means that we allow the intercepts of the fitted regression vary between subjects. From the results we see that variance of intercepts is 47.41 whereas residual variance is 104.21. Even though the residal variance is higher than the variance of intercepts, the variance of intercepts is still considerable. And also based on graphical examination of the data, it is reasonable to assume intercepts to vary between sucjects. The parameter estimates for week and treatment did not change much compared to the independence model (Table 9.3).
+
 ##### **TABLE 9.4** Results from fitting random intercept model, with week and treatment as explanatory variables, to BPRS data
-```{r}
+```{r, warning=FALSE, message=FALSE}
 #Table 9.4
 library("lme4")
 BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
 summary(BPRS_ref)
 ```
+
+Second step is to fit a random intercept and slope model. Now we allow also the slope of the regression line vary between subjects. Parameter estimates for fixed effects (week and treatment) are again very similar as with earlier models. We can also see that the variance of slopes is not very high (0.69). However, allowing random slopes increased the variance of intercepts and also comparing the models with ANOVA indicated slightly  better fit for the second model (p=0.026).
 
 ##### **TABLE 9.5** Results from fitting random intercept and slope model, with week and treatment as explanatory variables, to BPRS data
 ```{r}
@@ -219,6 +223,8 @@ summary(BPRS_ref2)
 
 anova(BPRS_ref2, BPRS_ref)
 ```
+
+The final step is to fit a random intercept and slope model allowing a treatmet + week interaction (Table 9.6). Now we can see some changes also in parameter estimates of fixed effect. However, the interaction between week and treatment does not appear very strong (beta 0.72 s.e. 0.40, T-value 1.785). Also when this final model is compared with previous model in ANOVA, it does not appear have significantly better fit to the data (p=0.075). The final conlusion from the models is that bprs scores decrease over time, but there is no difference between treatment groups.
 
 ##### **TABLE 9.6** Results from fitting the random intercept and slope model that allows for a treatment + week interaction to BPRS data
 
@@ -230,23 +236,25 @@ summary(BPRS_ref3)
 anova(BPRS_ref3, BPRS_ref2)
 ```
 
+Fitted cahnges in bprs scores from the final model and observed bprs changes are plotted in the figure 9.4. The figures support the conlusions made from the linear mixed models. The individual slopes show a clear decrease in bprs scores over time (weeks), but there seems to be no difference between the treatment groups 1 and 2. Steepness of the slopes seem to be approximately equal in both treatment groups.
 
-```{r, echo=TRUE, fig.width=8, fig.height=4}
+```{r, fig.width=8, fig.height=4}
 Fitted <- fitted(BPRS_ref3)
 BPRSL <- BPRSL %>% mutate(Fitted)
 graph1 <- ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
  geom_line(aes(linetype = treatment)) +
  scale_x_continuous(name = "week", breaks = seq(0, 8, 1)) +
- scale_y_continuous(name = "bprs score") +
+ scale_y_continuous(name = "bprs score", limits= c(15,95), breaks = seq(15, 95, 20)) +
  theme_bw() + theme(legend.position = "none")  +
  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
  ggtitle("Observed") +
   facet_grid(. ~ treatment, labeller = label_both)
 
+
 graph2 <- ggplot(BPRSL, aes(x = week, y = Fitted, group = subject)) +
  geom_line(aes(linetype = treatment)) +
  scale_x_continuous(name = "week", breaks = seq(0, 8, 1)) +
- scale_y_continuous(name = "bprs score") +
+ scale_y_continuous(name = "bprs score", limits= c(15,95), breaks = seq(15, 95, 20)) +
  theme_bw() + theme(legend.position = "none")  +
  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
  ggtitle("Fitted") +
@@ -256,6 +264,5 @@ graph1; graph2
 ```
 
 ##### **FIGURE 9.4** Fitted changes in bprs scores from the interaction model and observed bprs changes
-Fitted growth rate profiles from the interaction model and observed growth
-rate profiles.
+
 
